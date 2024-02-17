@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 public class ChatGPTManager : MonoBehaviour
 {
     public OnResponseEvent OnResponse;
+    public int maxTokensForResponse;
 
     [System.Serializable]
     public class OnResponseEvent : UnityEvent<string> { }
@@ -19,7 +20,7 @@ public class ChatGPTManager : MonoBehaviour
 
     private void Start()
     {
-        openAI = new OpenAIApi("", "");
+        openAI = new OpenAIApi(APIKeys.OpenAIKey, APIKeys.Organization);
 
         // Dodaj zdanie powitalne do listy oczekujących wiadomości
         AddWelcomeMessage();
@@ -67,9 +68,9 @@ public class ChatGPTManager : MonoBehaviour
             CreateChatCompletionRequest request = new CreateChatCompletionRequest();
             request.Messages = pendingMessages;
             request.Model = "gpt-3.5-turbo";
-            request.MaxTokens = 100; // Ograniczenie liczby tokenów
+            request.MaxTokens = maxTokensForResponse; // Ograniczenie liczby tokenów
 
-            Debug.Log("Sending request to ChatGPT API...");
+            // Debug.Log("Sending request to ChatGPT API...");
 
             Task<CreateChatCompletionResponse> task = openAI.CreateChatCompletion(request); // Uruchamiamy asynchroniczne zadanie
 
@@ -78,7 +79,7 @@ public class ChatGPTManager : MonoBehaviour
             if (task.Result.Choices != null && task.Result.Choices.Count > 0)
             {
                 var chatResponse = task.Result.Choices[0].Message;
-                Debug.Log("Received response from ChatGPT API: " + chatResponse.Content);
+                // Debug.Log("Received response from ChatGPT API: " + chatResponse.Content);
                 OnResponse.Invoke(chatResponse.Content);
             }
             else
